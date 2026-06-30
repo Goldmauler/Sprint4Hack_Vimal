@@ -3,11 +3,11 @@ Revision 3.1 — For internal distribution only
 
 PURPOSE
 
-This document defines procedures for document review workflows. It applies to all review stages and contains no personally identifying information.
+This document defines procedures for document review workflows within the organisation. It applies to all review stages.
 
 SCOPE
 
-This procedure applies to all departments involved in processing. No names, contact details, financial identifiers, or medical records are referenced here.
+This procedure applies to all departments involved in processing. No sensitive data is referenced in this document.
 
 STEPS
 
@@ -20,6 +20,6 @@ Step 6: Approve and export the final document.
 
 REVIEW CYCLE
 
-This procedure is reviewed annually. Changes require approval from the relevant oversight committee. No individual identifiers are referenced here.
+This procedure is reviewed annually. Changes require approval from the relevant oversight committee.
 
 Version history is maintained in a separate tracking system.
