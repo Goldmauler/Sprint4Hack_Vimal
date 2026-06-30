@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       } catch (llmError) {
         const msg = llmError instanceof Error ? llmError.message : "LLM failed";
         console.error("Gemini unavailable, using keyword + regex detection:", msg);
-        llmFallbackReason = `AI detection unavailable — using pattern-based detection. Low-confidence items are still queued for your review.`;
+        llmFallbackReason = `Local Pattern-Detection Mode — Gemini is temporarily unavailable, so this document is running on the deterministic regex/NLP engine instead. Low-confidence items are still queued for your review.`;
       }
     }
 

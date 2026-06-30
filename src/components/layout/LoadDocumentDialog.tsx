@@ -127,6 +127,7 @@ export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogP
   const [open, setOpen] = useState(false);
   const [customText, setCustomText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState(false);
 
   const handleLoad = (text: string, filename?: string) => {
     setError(null);
@@ -145,11 +146,37 @@ export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogP
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    e.target.value = "";
     setError(null);
+
+    const name = file.name.toLowerCase();
+    const isPdfOrDocx = name.endsWith(".pdf") || name.endsWith(".docx");
+
+    if (isPdfOrDocx) {
+      setExtracting(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/extract-file", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to extract text from file.");
+        }
+        handleLoad(data.text, file.name);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to process file.");
+      } finally {
+        setExtracting(false);
+      }
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result;
@@ -163,7 +190,6 @@ export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogP
       setError("Failed to read file. Please try again.");
     };
     reader.readAsText(file);
-    e.target.value = "";
   };
 
   return (
@@ -188,7 +214,7 @@ export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogP
             Load Document into Logic Engine
           </DialogTitle>
           <p className="text-sm text-[#464554] mt-2 leading-relaxed">
-            Upload plain text, annotated JSON, or inline-marked documents. The engine classifies the theme first, then analyzes redactions and flags false positives and missed PII.
+            Upload a PDF, DOCX, plain text, annotated JSON, or inline-marked document. The engine classifies the theme first, then analyzes redactions and flags false positives and missed PII.
           </p>
         </DialogHeader>
 
@@ -236,23 +262,24 @@ export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogP
           <div className="space-y-4">
             <div>
               <h3 className="text-xs font-semibold text-[#464554] uppercase tracking-wider mb-2">
-                Upload Document (.txt or .json)
+                Upload Document (.pdf, .docx, .txt, or .json)
               </h3>
               <div className="border border-dashed border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#f8f9ff] rounded-xl p-8 text-center cursor-pointer transition-all relative min-h-[140px] flex flex-col items-center justify-center">
                 <input
                   type="file"
-                  accept=".txt,.json,text/plain,application/json"
+                  accept=".txt,.json,.pdf,.docx,text/plain,application/json,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={extracting}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                 />
-                <span className="material-symbols-outlined text-[#777586] text-[32px] mb-2 block">
-                  cloud_upload
+                <span className={`material-symbols-outlined text-[#777586] text-[32px] mb-2 block ${extracting ? "animate-pulse" : ""}`}>
+                  {extracting ? "hourglass_top" : "cloud_upload"}
                 </span>
                 <p className="text-sm font-semibold text-[#0b1c30]">
-                  Click or drag file here to upload
+                  {extracting ? "Extracting text from file..." : "Click or drag file here to upload"}
                 </p>
                 <p className="text-xs text-[#777586] mt-1">
-                  Supports .txt, .json, {"{{PERSON:0.95}}Name{{/}}"}, or bracket markers like {"[[PERSON NAME] John Smith [name]]"}
+                  PDF and DOCX text is extracted server-side. Also supports raw .txt, .json, {"{{PERSON:0.95}}Name{{/}}"}, or bracket markers like {"[[PERSON NAME] John Smith [name]]"}
                 </p>
               </div>
             </div>

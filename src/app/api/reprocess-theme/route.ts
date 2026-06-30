@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
         const msg = llmError instanceof Error ? llmError.message : "LLM failed";
         console.error("Theme LLM reprocess failed, using regex fallback:", msg);
         llmSpans = regexFallbackSpans(parsed.rawText, theme);
-        llmFallbackReason = `AI unavailable (${msg.slice(0, 80)}). Using theme-filtered regex detection.`;
+        llmFallbackReason = `Local Pattern-Detection Mode — Gemini is temporarily unavailable, so this re-scan ran on the theme-filtered deterministic regex engine instead.`;
       }
     } else {
       llmSpans = regexFallbackSpans(parsed.rawText, theme);
-      llmFallbackReason = "No API key configured. Using theme-filtered regex detection.";
+      llmFallbackReason = "Local Pattern-Detection Mode — running on the theme-filtered deterministic regex engine.";
     }
 
     const processed = buildThemeProcessedDocument(parsed, theme, llmSpans, {

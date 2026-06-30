@@ -25,6 +25,8 @@ A full-stack Next.js application built for the exact scenario where a PII redact
 
 **How to test:** Click any Download link → right-click → Save As → open the live app → click **Load / Import Document** → upload the file.
 
+**Your own files work too.** LexRedact isn't limited to the curated set above — drop in your own `.pdf`, `.docx`, `.txt`, or `.json` file and it runs through the exact same pipeline. PDF and DOCX text is extracted server-side (`pdf-parse` / `mammoth`) before classification and redaction analysis.
+
 ---
 
 ## Demo Video
@@ -154,6 +156,16 @@ Every decision is now queryable — not just "Sam said no" but exactly why.
 
 The final dialog shows a post-review breakdown: missed PII you caught, false positives you unblocked, decisions logged with exemption codes. Sam can prove his review was thorough, not just that he clicked Approve.
 
+### 6 — Hybrid Detection: Deterministic Engine + Contextual LLM, Always Both
+
+Two detectors run on every document, not one with a backup:
+
+- A **deterministic regex/NLP engine** runs first and unconditionally — it never depends on network access or an API key. This is the same category of detection (pattern + rule-based, fully local, reproducible) that privacy-first tools rely on as their *only* layer.
+- **Gemini runs on top of it**, contextually catching what fixed patterns can't — a name that's only sensitive because of the surrounding sentence, a nickname implied to refer to a specific person, boilerplate that *looks* like PII but isn't.
+- If Gemini is unreachable (quota, network, no key), the document doesn't error out or block review — it falls back to the deterministic pass alone, and the UI shows a calm **"Local Pattern-Detection Mode"** banner instead of an error. Review still works; only the contextual layer is temporarily missing.
+
+This means LexRedact never has a hard dependency on an external API for the document to be reviewable at all, while still getting LLM-grade contextual recall whenever the API is available — the best of both worlds, running by default rather than as a roadmap item.
+
 ---
 
 ## How LexRedact Compares
@@ -168,7 +180,21 @@ The final dialog shows a post-review breakdown: missed PII you caught, false pos
 | False positive logging | Binary yes/no | Structured exemption codes (machine-readable) |
 | End-of-review feedback | None | "What your review caught" — missed PII + FP count |
 | Undo | Usually absent | Ctrl+Z reverts last correction |
-| AI failure handling | Error or crash | 4-model fallback chain + amber UI banner |
+| Input formats | Plain text only | PDF, DOCX, TXT, JSON, inline & bracket markers |
+| AI failure handling | Error or crash | Deterministic engine keeps running + calm UI banner |
+| Audit trail | None, or a flat log | Exportable JSON report: every span, decision, exemption code, timestamp |
+
+### vs. deterministic/local-only redaction tools (e.g. Presidio-based)
+
+Tools built purely on regex + NER (no LLM) are deliberately privacy-first and have no API dependency — a real, valid trade-off. LexRedact takes the same deterministic layer as a *mandatory baseline* (see Novel Feature #6) and adds a contextual LLM pass on top, rather than treating contextual detection as out of scope:
+
+| Capability | Deterministic-only tool | LexRedact |
+|---|---|---|
+| Catches contextual/implicit PII (e.g. a nickname only sensitive given context) | No — out of scope by design | Yes — Gemini layer, with regex baseline as fallback |
+| Works with zero API dependency | Yes, always | Yes — deterministic layer never depends on the network |
+| Correction workflow depth | Per-token toggle, one at a time | Grouped batch correction, exemption codes, undo, audit export |
+| Review prioritization | Flat list, every token clickable | Confidence-routed queue: auto-trusted vs. needs-review |
+| Domain-aware scope | Fixed recognizer set | 5 switchable redaction themes, rescanned live |
 
 ---
 
@@ -210,7 +236,8 @@ src/
 ├── app/
 │   ├── api/
 │   │   ├── process-document/        ← POST: classify + Gemini detect + gap scan
-│   │   └── reprocess-theme/         ← POST: re-detect under a specific theme
+│   │   ├── reprocess-theme/         ← POST: re-detect under a specific theme
+│   │   └── extract-file/            ← POST: PDF/DOCX → plain text (pdf-parse / mammoth)
 │   └── page.tsx
 ├── components/
 │   ├── ReviewWorkspace.tsx           ← Orchestrator
@@ -263,7 +290,9 @@ node scripts/test-backend.mjs
 
 ## Creating Your Own Test Files
 
-You can upload any of the four formats below. The app auto-detects the format from the file content.
+You can upload any of the formats below — including real **PDF and DOCX files**, no conversion needed. The app extracts text server-side for those two formats, then auto-detects the underlying format (plain text / JSON / inline markers / bracket markers) from the content.
+
+> **PDF / DOCX**: just upload the file as-is via "Load / Import Document." Text is extracted with `pdf-parse` (PDF) or `mammoth` (DOCX) and run through the same classification + detection pipeline as a `.txt` upload. Scanned PDFs with no selectable text layer aren't supported (no OCR) — the app will tell you if no text was found.
 
 ---
 

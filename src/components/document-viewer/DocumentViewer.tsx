@@ -116,8 +116,8 @@ export function DocumentViewer({
           </div>
         )}
         {!isLlmRefining && llmFallbackReason && (
-          <div className="mb-4 flex items-start gap-2 rounded-lg border border-[#ffb759]/60 bg-[#fff8ee] px-3 py-2 text-xs text-[#553300]">
-            <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5 text-[#e07b00]">warning</span>
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-[#c3c0ff]/60 bg-[#eff4ff] px-3 py-2 text-xs text-[#2a14b4]">
+            <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5 text-[#2a14b4]">offline_bolt</span>
             <span>{llmFallbackReason}</span>
           </div>
         )}
