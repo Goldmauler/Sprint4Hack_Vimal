@@ -4,6 +4,8 @@
 
 A full-stack Next.js application built for the exact scenario where a PII redaction tool gets it wrong — hiding harmless boilerplate while leaving a real phone number and a real name untouched — and the reviewer moving fast doesn't catch either mistake.
 
+> **Engineering deep dive:** see [`APPROACH.md`](./APPROACH.md) for the exact request/response flow, the resilience chain, and how detection/risk-scoring/review-state actually work under the hood.
+
 ---
 
 ## Live Demo
