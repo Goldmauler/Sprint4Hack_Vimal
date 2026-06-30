@@ -6,9 +6,19 @@ A full-stack Next.js application built for the exact scenario where a PII redact
 
 ---
 
+## Live Demo
+
+**[https://sprint4hack-vimal.onrender.com](https://sprint4hack-vimal.onrender.com)**
+
+> The app is deployed on Render's free tier — if it shows a loading spinner on first open, wait 20–30 seconds for the cold start. It will be fully functional once loaded.
+
+---
+
 ## Demo Video
 
 **[Watch the full walkthrough on Google Drive](https://drive.google.com/drive/folders/1RK90YvfZXxjfcZCPq44vH_fAT3s5TIxb?usp=sharing)**
+
+> **Note on the video:** The recording was made during local development where the Gemini API quota was hit mid-session (free tier: 50 requests/day). You may see the amber "AI detection unavailable" fallback banner in some parts of the video — this is the graceful degradation working as intended, not a bug. The **live deployed app** at the link above has a fresh API key and runs full Gemini detection end-to-end. For the clearest demonstration of AI-assisted detection, use the live deployment.
 
 The video covers:
 - Loading the PS3 core scenario (false positives + missed PII in a single document)
