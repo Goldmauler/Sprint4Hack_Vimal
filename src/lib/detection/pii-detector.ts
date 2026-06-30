@@ -34,9 +34,12 @@ const NON_NAME_WORDS = new Set([
   "january", "february", "march", "april", "june", "july", "august",
   "september", "october", "november", "december", "monday", "tuesday",
   "wednesday", "thursday", "friday", "saturday", "sunday",
-  // Address component words — should never be part of a person name
+  // Address component words
   "street", "avenue", "boulevard", "drive", "road", "lane", "way", "court",
   "place", "circle", "trail", "highway", "parkway", "terrace", "square",
+  // Common imperative verbs that start sentences
+  "call", "see", "ask", "tell", "meet", "contact", "reach", "send", "check",
+  "help", "find", "note", "please", "review", "confirm", "update", "submit",
 ]);
 
 interface PatternDef {
@@ -75,9 +78,9 @@ const DETECTION_PATTERNS: PatternDef[] = [
     type: "FINANCIAL_ID",
     confidence: 0.95,
   },
-  // Financial amounts
+  // Financial amounts — handles $1,200.00 and abbreviated $4.2M / $1.8B / £500K
   {
-    regex: /\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/g,
+    regex: /[$£€¥]\d{1,3}(?:,\d{3})*(?:\.\d+)?(?:\s*[KMBTkmbt](?:illion|n)?)?\b/g,
     type: "FINANCIAL",
     confidence: 0.88,
   },
@@ -164,7 +167,11 @@ function findPattern(
     if (type === "PERSON") {
       const words = matchedText.split(/\s+/);
       if (words.some((w) => NON_NAME_WORDS.has(w.toLowerCase()))) continue;
-      if (words[0] && ["this", "all", "internal", "dear", "the", "disclosing", "receiving", "mutual"].includes(words[0].toLowerCase())) continue;
+      if (words[0] && [
+      "this", "all", "internal", "dear", "the", "disclosing", "receiving", "mutual",
+      "call", "see", "ask", "tell", "meet", "contact", "reach", "email", "send",
+      "check", "help", "find", "please", "note", "re", "per", "via", "cc", "bcc",
+    ].includes(words[0].toLowerCase())) continue;
     }
 
     spans.push({

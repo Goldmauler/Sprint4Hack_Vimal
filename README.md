@@ -261,6 +261,110 @@ node scripts/test-backend.mjs
 
 ---
 
+## Creating Your Own Test Files
+
+You can upload any of the four formats below. The app auto-detects the format from the file content.
+
+---
+
+### Format 1 — Plain Text `.txt`
+
+Just paste any document. The AI scans it fresh with no prior suggestions.
+
+```
+DEMAND LETTER
+
+Dear Claims Adjuster,
+
+My client John Mitchell was injured on March 14, 2024.
+Contact our office at (555) 867-5309 or john@example.com.
+Policy No. AIG-4471-XJ. Total damages: $45,750.00.
+```
+
+**Best for:** Testing AI detection on a document you wrote yourself. Every span is AI-detected from scratch.
+
+---
+
+### Format 2 — JSON with Pre-Annotated Suggestions `.json`
+
+Simulates a tool that has already made redaction suggestions — some correct, some wrong. This is the PS3 scenario format.
+
+```json
+{
+  "title": "My Document Title",
+  "text": "The full document text goes here. John Smith called (555) 123-4567.",
+  "suggestions": [
+    { "text": "John Smith",     "type": "PERSON",   "confidence": 0.95 },
+    { "text": "(555) 123-4567", "type": "PHONE",    "confidence": 0.92 },
+    { "text": "the plaintiff",  "type": "PERSON",   "confidence": 0.48 }
+  ]
+}
+```
+
+**Rules:**
+- `text` — the full document content (required)
+- `title` — optional display name
+- `suggestions` — array of spans the "tool" suggested
+- Each suggestion needs `text` (exact substring) and `type`
+- `confidence` is optional (defaults to 0.70 if omitted)
+- Items with confidence **< 0.78** go to the human review queue
+- Items with confidence **≥ 0.78** are auto-redacted (shown as black blocks)
+
+**Supported `type` values:**
+`PERSON` `PHONE` `DATE` `CASE_NUMBER` `FINANCIAL` `FINANCIAL_ID` `ORGANIZATION` `DIAGNOSIS` `ADDRESS` `OTHER`
+
+**To simulate false positives** — include boilerplate with low confidence (< 0.56):
+```json
+{ "text": "the plaintiff",  "type": "PERSON", "confidence": 0.48 }
+{ "text": "Exhibit A",      "type": "OTHER",  "confidence": 0.41 }
+{ "text": "Attorney at Law","type": "PERSON", "confidence": 0.40 }
+```
+
+**To simulate missed PII** — simply don't include it in suggestions. Gap detection will find it automatically.
+
+---
+
+### Format 3 — Inline Markers `.txt`
+
+Wrap each PII span with `{{TYPE:confidence}}text{{/}}`. Useful for testing specific confidence routing.
+
+```
+Patient: {{PERSON:0.97}}Alice Johnson{{/}}
+DOB: {{DATE:0.72}}November 4, 1981{{/}}
+Phone: {{PHONE:0.93}}(555) 234-5678{{/}}
+Diagnosis: {{DIAGNOSIS:0.71}}Type 2 Diabetes{{/}}
+Adjuster: {{PERSON:0.44}}Claims Team Rep{{/}}
+```
+
+Items above `0.78` → auto-redacted. Items below `0.78` → review queue.
+
+---
+
+### Format 4 — Bracket Markers `.txt`
+
+```
+[[PERSON NAME] Alice Vance [name]] at [[ADDRESS] 456 Oak Lane, Seattle [address]]
+SSN: [[FINANCIAL_ID] 999-12-3456 [id]]
+Contact: [[PHONE] (555) 123-4567 [phone]]
+```
+
+All bracket-marked items default to `0.85` confidence (auto-trusted).
+
+---
+
+### Quick Reference
+
+| Want to test | Use format | Set confidence |
+|---|---|---|
+| AI detection from scratch | Plain `.txt` | N/A — Gemini decides |
+| False positives (over-redaction) | JSON suggestions | `< 0.56` for FP candidates |
+| Missed PII (under-redaction) | JSON — omit the item | Gap detection finds it |
+| Mixed correct + wrong | JSON with mix | High conf for correct, low for FP |
+| Specific confidence routing | Inline markers | Set exact value per span |
+| High-volume auto-redaction | JSON suggestions | `> 0.78` for all items |
+
+---
+
 ## Design Decisions
 
 **Why auto-trust high-confidence items?**

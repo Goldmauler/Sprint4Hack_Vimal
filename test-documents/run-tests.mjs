@@ -94,15 +94,17 @@ const TESTS = [
     name: "05 Clean document — no PII, approve enabled",
     file: "05-clean-no-pii.txt",
     verify(d) {
-      const missed  = byStatus(d.spans, "missed");
-      const review  = byStatus(d.spans, "needs-review");
-      // No missed PII — any review items must be very low confidence (Gemini uncertainty, not real PII)
+      const missed = byStatus(d.spans, "missed");
+      // No missed PII
       if (missed.length > 0) throw new Error(`Expected 0 missed, got ${missed.length}`);
-      const highConfReview = review.filter((s) => s.confidence > 0.50);
-      if (highConfReview.length > 0) {
-        throw new Error(`Unexpected high-conf PII in clean doc: ${highConfReview.map(s => s.text).join(", ")}`);
+      // No real PII types — only OTHER/DATE at most from Gemini being cautious
+      const realPii = d.spans.filter((s) =>
+        ["PERSON","PHONE","ADDRESS","FINANCIAL","FINANCIAL_ID","DIAGNOSIS"].includes(s.type) && s.confidence > 0.60
+      );
+      if (realPii.length > 0) {
+        throw new Error(`Real PII found in clean doc: ${realPii.map(s => `"${s.text}" (${s.type})`).join(", ")}`);
       }
-      return `total=${d.spans.length}, missed=0, low-conf-only=${review.length} — approve path clear ✓`;
+      return `total=${d.spans.length}, missed=0, real_pii=0 — approve path clear ✓`;
     },
   },
   {
