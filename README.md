@@ -12,6 +12,19 @@ A full-stack Next.js application built for the exact scenario where a PII redact
 
 > Free-tier cold start: if the page loads blank, wait 20–30 seconds and refresh once.
 
+### Test it — download a file and upload it via "Load / Import Document"
+
+| File | What it demonstrates | Download |
+|---|---|---|
+| `01-ps3-core-scenario.json` | **Start here** — the exact PS3 scenario: legal boilerplate wrongly hidden + phone & name missed by the AI | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/01-ps3-core-scenario.json) |
+| `02-repeated-entity.txt` | Same doctor's name appears 9× — shows the entity grouping "× 9 instances" batch correction | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/02-repeated-entity.txt) |
+| `06-medical-missed-pii.json` | Medical discharge summary — AI missed a phone number and contact name | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/06-medical-missed-pii.json) |
+| `07-legal-fp-heavy.json` | Settlement agreement — AI over-redacted 8 pieces of legal boilerplate | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/07-legal-fp-heavy.json) |
+| `05-clean-no-pii.txt` | SOP document with no PII — approve button enables immediately with 0 spans | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/05-clean-no-pii.txt) |
+| `10-long-document.txt` | 800+ word multi-party litigation file — stress test with 76 PII spans | [Download](https://raw.githubusercontent.com/Goldmauler/Sprint4Hack_Vimal/master/test-documents/10-long-document.txt) |
+
+**How to test:** Click any Download link → right-click → Save As → open the live app → click **Load / Import Document** → upload the file.
+
 ---
 
 ## Demo Video
