@@ -1,18 +1,59 @@
 "use client";
 
-import { useReducer, useCallback, useMemo } from "react";
+import { useReducer, useCallback, useMemo, useRef, type Dispatch } from "react";
 import {
   ReviewState,
   ReviewAction,
-  RedactionSpan,
-  AuditLogEntry,
   CorrectionAction,
   SpanStatus,
+  DocumentType,
 } from "../lib/types";
-import { MOCK_DOCUMENT_TEXT } from "../lib/mock-data";
+import { buildProcessedDocument, ProcessedDocument } from "../lib/document-processor";
+import { parseUploadedContent } from "../lib/document-parser";
 import { classifyDocument } from "../lib/detection/classify-document";
-import { applyRiskScores } from "../lib/detection/risk-rules";
-import { detectAllPII } from "../lib/detection/pii-detector";
+import { fetchProcessedDocument, fetchThemeReprocess } from "../lib/api/process-document-client";
+
+const IDLE_STATE: ReviewState = {
+  rawText: "",
+  documentContent: "",
+  spans: [],
+  auditLog: [],
+  documentType: "general",
+  classification: { type: "general", confidence: 0, method: "keyword" },
+  isApproved: false,
+  documentTitle: "",
+  filename: undefined,
+  reviewableSpanIds: [],
+  isProcessing: false,
+  isLlmRefining: false,
+  usedLlm: false,
+  processingMessage: undefined,
+  llmFallbackReason: undefined,
+};
+
+function processedToReviewState(
+  processed: ProcessedDocument,
+  content: string,
+  filename?: string
+): ReviewState {
+  return {
+    rawText: processed.rawText,
+    documentContent: content,
+    spans: processed.spans,
+    auditLog: [],
+    documentType: processed.classification.type,
+    classification: processed.classification,
+    isApproved: false,
+    documentTitle: processed.title,
+    filename,
+    reviewableSpanIds: processed.reviewableSpanIds,
+    isProcessing: false,
+    isLlmRefining: false,
+    usedLlm: processed.usedLlm,
+    processingMessage: undefined,
+    llmFallbackReason: processed.llmFallbackReason,
+  };
+}
 
 function getNewStatus(action: CorrectionAction, currentStatus: SpanStatus): SpanStatus {
   switch (action) {
@@ -31,7 +72,6 @@ function getNewStatus(action: CorrectionAction, currentStatus: SpanStatus): Span
 function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
   switch (action.type) {
     case "SET_DOCUMENT_TYPE": {
-      const newSpans = applyRiskScores(state.spans, action.payload);
       return {
         ...state,
         documentType: action.payload,
@@ -40,7 +80,6 @@ function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
           type: action.payload,
           method: "manual-override",
         },
-        spans: newSpans,
       };
     }
 
@@ -52,7 +91,7 @@ function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
       const span = state.spans[spanIndex];
       const newStatus = getNewStatus(correctionAction, span.status);
 
-      const updatedSpan: RedactionSpan = {
+      const updatedSpan = {
         ...span,
         status: newStatus,
         reviewerNote: note || span.reviewerNote,
@@ -61,8 +100,8 @@ function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
       const newSpans = [...state.spans];
       newSpans[spanIndex] = updatedSpan;
 
-      const auditEntry: AuditLogEntry = {
-        id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      const auditEntry = {
+        id: `audit-${Date.now()}-${spanId}`,
         spanId: span.id,
         spanText: span.text,
         piiType: span.type,
@@ -80,29 +119,72 @@ function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
       };
     }
 
-    case "APPROVE": {
+    case "UNDO_LAST_CORRECTION": {
+      if (state.auditLog.length === 0) return state;
+
+      const lastEntry = state.auditLog[0]; // newest first
+      const spanIdx = state.spans.findIndex((s) => s.id === lastEntry.spanId);
+      if (spanIdx === -1) return state;
+
+      const revertedSpans = [...state.spans];
+      revertedSpans[spanIdx] = {
+        ...revertedSpans[spanIdx],
+        status: lastEntry.previousStatus,
+        reviewerNote: undefined,
+      };
+
       return {
         ...state,
-        isApproved: true,
+        spans: revertedSpans,
+        auditLog: state.auditLog.slice(1),
       };
     }
 
-    case "RESET": {
-      return createInitialState();
+    case "APPROVE": {
+      return { ...state, isApproved: true };
     }
 
-    case "LOAD_DOCUMENT": {
-      const text = action.payload;
-      const classification = classifyDocument(text);
-      const spans = detectAllPII(text, classification.type);
+    case "RESET": {
+      return { ...IDLE_STATE };
+    }
 
+    case "LOAD_DOCUMENT_START": {
       return {
-        rawText: text,
-        spans,
-        auditLog: [],
-        documentType: classification.type,
-        classification,
+        ...state,
+        isProcessing: true,
+        isLlmRefining: false,
+        usedLlm: false,
+        processingMessage: "Parsing document...",
+        filename: action.payload.filename,
         isApproved: false,
+        auditLog: [],
+        llmFallbackReason: undefined,
+      };
+    }
+
+    case "LOAD_DOCUMENT_PROCESSED": {
+      return processedToReviewState(
+        action.payload.processed,
+        action.payload.content,
+        action.payload.filename
+      );
+    }
+
+    case "LLM_REFINEMENT_START": {
+      return {
+        ...state,
+        isProcessing: false,
+        isLlmRefining: true,
+        processingMessage:
+          action.payload?.message ?? "Low keyword confidence — refining with AI...",
+      };
+    }
+
+    case "LLM_REFINEMENT_END": {
+      return {
+        ...state,
+        isLlmRefining: false,
+        processingMessage: undefined,
       };
     }
 
@@ -111,28 +193,128 @@ function reviewReducer(state: ReviewState, action: ReviewAction): ReviewState {
   }
 }
 
-function createInitialState(): ReviewState {
-  const classification = classifyDocument(MOCK_DOCUMENT_TEXT);
-  const spans = detectAllPII(MOCK_DOCUMENT_TEXT, classification.type);
+async function runDocumentPipeline(
+  content: string,
+  filename: string | undefined,
+  dispatch: Dispatch<ReviewAction>,
+  requestId: number,
+  loadRequestIdRef: { current: number }
+) {
+  dispatch({ type: "LOAD_DOCUMENT_START", payload: { filename } });
 
-  return {
-    rawText: MOCK_DOCUMENT_TEXT,
-    spans,
-    auditLog: [],
-    documentType: classification.type,
-    classification,
-    isApproved: false,
-  };
+  try {
+    const parsed = parseUploadedContent(content, filename);
+    const classification = classifyDocument(parsed.rawText);
+    const keywordProcessed = buildProcessedDocument(parsed, classification);
+
+    if (loadRequestIdRef.current !== requestId) return;
+
+    dispatch({
+      type: "LOAD_DOCUMENT_PROCESSED",
+      payload: { processed: keywordProcessed, content, filename },
+    });
+
+    const hasImportedAnnotations = parsed.annotations.length > 0;
+    // Always use Gemini for best detection results on all document types.
+    // For annotated docs, LLM audits existing suggestions.
+    // For plain text, LLM detects PII directly (more accurate than regex alone).
+
+    dispatch({
+      type: "LLM_REFINEMENT_START",
+      payload: {
+        message: hasImportedAnnotations
+          ? "AI checking for suspicious redactions..."
+          : "AI scanning for PII — low-confidence detections will need your review...",
+      },
+    });
+
+    try {
+      const llmProcessed = await fetchProcessedDocument(content, filename);
+      if (loadRequestIdRef.current !== requestId) return;
+
+      dispatch({
+        type: "LOAD_DOCUMENT_PROCESSED",
+        payload: { processed: llmProcessed, content, filename },
+      });
+    } catch (llmError) {
+      console.error("LLM fallback failed:", llmError);
+      if (loadRequestIdRef.current === requestId) {
+        dispatch({ type: "LLM_REFINEMENT_END" });
+      }
+    }
+  } catch (error) {
+    console.error("Document processing failed:", error);
+    if (loadRequestIdRef.current !== requestId) return;
+
+    dispatch({
+      type: "LOAD_DOCUMENT_PROCESSED",
+      payload: {
+        processed: {
+          title: filename || "Document",
+          rawText: content,
+          spans: [],
+          classification: { type: "general", confidence: 0, method: "keyword" },
+          reviewableSpanIds: [],
+          usedLlm: false,
+          stats: {
+            totalSpans: 0,
+            autoTrusted: 0,
+            needsReview: 0,
+            missed: 0,
+            fromAnnotations: 0,
+            fromDetection: 0,
+            fromLlm: 0,
+          },
+        },
+        content,
+        filename,
+      },
+    });
+  }
 }
 
 export function useReviewState() {
-  const [state, dispatch] = useReducer(reviewReducer, null, createInitialState);
+  const [state, dispatch] = useReducer(reviewReducer, IDLE_STATE);
+  const loadRequestIdRef = useRef(0);
+  const themeRequestIdRef = useRef(0);
 
   const setDocumentType = useCallback(
-    (type: ReviewState["documentType"]) => {
+    async (type: DocumentType) => {
+      if (!state.documentContent || type === state.documentType) return;
+
+      const requestId = ++themeRequestIdRef.current;
+      ++loadRequestIdRef.current;
+
       dispatch({ type: "SET_DOCUMENT_TYPE", payload: type });
+      dispatch({
+        type: "LLM_REFINEMENT_START",
+        payload: { message: `Re-scanning with AI for ${type} redaction scope...` },
+      });
+
+      try {
+        const processed = await fetchThemeReprocess(
+          state.documentContent,
+          type,
+          state.filename
+        );
+        if (themeRequestIdRef.current !== requestId) return;
+
+        dispatch({
+          type: "LOAD_DOCUMENT_PROCESSED",
+          payload: {
+            processed,
+            content: state.documentContent,
+            filename: state.filename,
+          },
+        });
+      } catch (error) {
+        console.error("Theme reprocess failed:", error);
+        if (themeRequestIdRef.current === requestId) {
+          dispatch({ type: "LLM_REFINEMENT_END" });
+        }
+      }
     },
-    []
+    [state.documentContent, state.documentType, state.filename]
   );
 
   const applyCorrection = useCallback(
@@ -145,19 +327,25 @@ export function useReviewState() {
     []
   );
 
+  const undoLastCorrection = useCallback(() => {
+    dispatch({ type: "UNDO_LAST_CORRECTION" });
+  }, []);
+
   const approve = useCallback(() => {
     dispatch({ type: "APPROVE" });
   }, []);
 
   const reset = useCallback(() => {
+    ++loadRequestIdRef.current;
     dispatch({ type: "RESET" });
   }, []);
 
-  const loadDocument = useCallback((text: string) => {
-    dispatch({ type: "LOAD_DOCUMENT", payload: text });
+  const loadDocument = useCallback((content: string, filename?: string) => {
+    const requestId = ++loadRequestIdRef.current;
+    themeRequestIdRef.current = requestId;
+    void runDocumentPipeline(content, filename, dispatch, requestId, loadRequestIdRef);
   }, []);
 
-  // Derived state
   const reviewableSpans = useMemo(
     () =>
       state.spans
@@ -166,34 +354,33 @@ export function useReviewState() {
     [state.spans]
   );
 
-  // How many total items originally needed review
-  const totalReviewable = useMemo(() => {
-    // Count all items in the spans array that started as "needs-review" or "missed" (which is matches that aren't auto-trusted initially)
-    // To know their initial state, we look at their status OR if they are resolved (confirmed-redact/confirmed-reveal)
+  const totalReviewable = state.reviewableSpanIds.length;
+  const hasDocument = state.documentContent.length > 0;
+
+  const reviewedCount = useMemo(() => {
+    const reviewableSet = new Set(state.reviewableSpanIds);
     return state.spans.filter(
       (s) =>
-        s.status === "needs-review" ||
-        s.status === "missed" ||
-        s.status === "confirmed-redact" ||
-        s.status === "confirmed-reveal"
-    ).filter(
-      (s) => !s.id.startsWith("suggest-") || s.status !== "auto-trusted"
+        reviewableSet.has(s.id) &&
+        (s.status === "confirmed-redact" || s.status === "confirmed-reveal")
     ).length;
-  }, [state.spans]);
+  }, [state.spans, state.reviewableSpanIds]);
 
-  // How many of those reviewable items have been resolved (confirmed)
-  const reviewedCount = useMemo(() => {
-    return state.spans.filter(
-      (s) => s.status === "confirmed-redact" || s.status === "confirmed-reveal"
-    ).length;
-  }, [state.spans]);
+  // Allow approval even when no spans were detected (clean document with no PII).
+  const canApprove =
+    hasDocument &&
+    reviewableSpans.length === 0 &&
+    !state.isProcessing &&
+    !state.isLlmRefining;
 
-  const canApprove = reviewableSpans.length === 0;
+  const canUndo = state.auditLog.length > 0 && !state.isApproved;
 
   return {
     state,
+    hasDocument,
     setDocumentType,
     applyCorrection,
+    undoLastCorrection,
     approve,
     reset,
     loadDocument,
@@ -201,5 +388,6 @@ export function useReviewState() {
     reviewedCount,
     totalReviewable,
     canApprove,
+    canUndo,
   };
 }

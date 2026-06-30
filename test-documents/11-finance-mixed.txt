@@ -1,0 +1,42 @@
+QUARTERLY FINANCIAL STATEMENT
+Prepared for: Raymond Osei
+Client ID: CLI-2026-00312
+Date: June 30, 2026
+
+PERSONAL INFORMATION
+Full Name: Raymond Osei
+SSN: 622-44-8801
+Date of Birth: February 9, 1971
+Address: 14 Thornton Place, Boston, MA 02108
+Phone: (617) 334-9021
+Email: r.osei@bostonfinancial.net
+
+ACCOUNT SUMMARY
+
+Checking Account — First Citizens Bank
+Account Number: 003-8821-44019
+Routing Number: 011001234
+Balance: $24,300.00
+
+Savings Account — First Citizens Bank
+Account Number: 003-8821-44020
+Balance: $87,550.00
+
+Investment Portfolio — Fidelity Investments
+Account: FOL-2026-RC-0312
+Total Value: $312,000.00
+YTD Return: 8.4%
+
+RECENT TRANSACTIONS
+
+06/01  Payroll deposit — Osei Consulting LLC         $14,200.00
+06/05  Payment to IRS — Estimated Tax Q2              $8,500.00
+06/10  Wire OUT — Raymond Osei Family Trust           $5,000.00
+06/15  ACH IN — Client payment, Invoice #INV-2026-44    $3,200.00
+06/20  Credit Card payment — Amex ending 8812         $2,100.00
+06/25  Mortgage payment — 14 Thornton Place           $3,800.00
+
+NOTES
+Prepared by: Sandra Kim, CPA (License No. MA-CPA-40211)
+Contact: (617) 334-0099 | skim@bostonfinancial.net
+Reference: Tax ID EIN 84-0021222

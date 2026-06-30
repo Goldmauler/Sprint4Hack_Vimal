@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +14,7 @@ const PRESETS = [
     name: "Legal Settlement Demand",
     desc: "Personal injury demand letter with medical history and policy details.",
     type: "Hybrid",
+    filename: "demand-letter.txt",
     text: `DEMAND LETTER
 
 Re: Personal Injury Claim — John Mitchell v. Pacific Coast Insurance Group
@@ -66,6 +66,7 @@ Attorney at Law`,
     name: "Confidential NDA",
     desc: "Mutual non-disclosure agreement with SSN, emails, and address fields.",
     type: "Legal",
+    filename: "nda.txt",
     text: `MUTUAL NON-DISCLOSURE AGREEMENT
 
 This Mutual Non-Disclosure Agreement ("Agreement") is entered into on June 30, 2026, by and between:
@@ -89,6 +90,7 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
     name: "Patient Discharge Summary",
     desc: "Clinical summary containing patient details, diagnostics, and doctor's remarks.",
     type: "Medical",
+    filename: "discharge-summary.txt",
     text: `SPRINGFIELD HOSPITAL GROUP
 PATIENT DISCHARGE SUMMARY
 
@@ -117,86 +119,110 @@ Patient is instructed to follow up with neurology in 7-10 days. Physical therapy
 ];
 
 interface LoadDocumentDialogProps {
-  onLoad: (text: string) => void;
+  onLoad: (text: string, filename?: string) => void;
+  isProcessing?: boolean;
 }
 
-export function LoadDocumentDialog({ onLoad }: LoadDocumentDialogProps) {
+export function LoadDocumentDialog({ onLoad, isProcessing }: LoadDocumentDialogProps) {
   const [open, setOpen] = useState(false);
   const [customText, setCustomText] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePresetSelect = (text: string) => {
-    onLoad(text);
+  const handleLoad = (text: string, filename?: string) => {
+    setError(null);
+    onLoad(text, filename);
     setOpen(false);
+    setCustomText("");
+  };
+
+  const handlePresetSelect = (text: string, filename: string) => {
+    handleLoad(text, filename);
   };
 
   const handleCustomSubmit = () => {
     if (customText.trim()) {
-      onLoad(customText);
-      setCustomText("");
-      setOpen(false);
+      handleLoad(customText, "custom-document.txt");
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result;
-        if (typeof text === "string") {
-          onLoad(text);
-          setOpen(false);
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+
+    setError(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result;
+      if (typeof text === "string" && text.trim()) {
+        handleLoad(text, file.name);
+      } else {
+        setError("Could not read file content. Please upload a valid .txt or .json file.");
+      }
+    };
+    reader.onerror = () => {
+      setError("Failed to read file. Please try again.");
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="w-full mt-3 h-9 text-xs border border-dashed border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#eff4ff] text-[#2a14b4] font-semibold flex items-center justify-center gap-1.5 transition-all rounded-lg cursor-pointer bg-white">
-        <span className="material-symbols-outlined text-[16px]">upload_file</span>
-        Load / Import Document
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-white border-[#c7c4d7]">
-        <DialogHeader className="pb-2 border-b border-[#c7c4d7]">
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-[#0b1c30]">
-            <span className="material-symbols-outlined text-[#2a14b4]">description</span>
+    <>
+      <button
+        type="button"
+        disabled={isProcessing}
+        onClick={() => setOpen(true)}
+        className="w-full mt-3 h-9 text-xs border border-dashed border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#eff4ff] text-[#2a14b4] font-semibold flex items-center justify-center gap-1.5 transition-all rounded-lg cursor-pointer bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span className="material-symbols-outlined text-[16px]">
+          {isProcessing ? "hourglass_top" : "upload_file"}
+        </span>
+        {isProcessing ? "Analyzing..." : "Load / Import Document"}
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="w-[92vw] max-w-4xl max-h-[90vh] overflow-y-auto bg-white border-[#c7c4d7] p-8">
+        <DialogHeader className="pb-4 border-b border-[#c7c4d7]">
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-[#0b1c30]">
+            <span className="material-symbols-outlined text-[#2a14b4] text-[26px]">description</span>
             Load Document into Logic Engine
           </DialogTitle>
+          <p className="text-sm text-[#464554] mt-2 leading-relaxed">
+            Upload plain text, annotated JSON, or inline-marked documents. The engine classifies the theme first, then analyzes redactions and flags false positives and missed PII.
+          </p>
         </DialogHeader>
 
-        {/* Presets */}
-        <div className="space-y-4 pt-4">
+        <div className="space-y-6 pt-6">
           <div>
-            <h3 className="text-xs font-semibold text-[#464554] uppercase tracking-wider mb-2.5">
+            <h3 className="text-xs font-semibold text-[#464554] uppercase tracking-wider mb-3">
               Select Preset Document
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {PRESETS.map((preset) => (
-                <div
+                <button
+                  type="button"
                   key={preset.name}
-                  onClick={() => handlePresetSelect(preset.text)}
-                  className="border border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#eff4ff] rounded-xl p-4 cursor-pointer transition-all shadow-sm hover:shadow group flex flex-col justify-between"
+                  onClick={() => handlePresetSelect(preset.text, preset.filename)}
+                  className="text-left border border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#eff4ff] rounded-xl p-5 cursor-pointer transition-all shadow-sm hover:shadow-md group flex flex-col justify-between w-full min-h-[140px]"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold text-[#0b1c30] group-hover:text-[#2a14b4] truncate max-w-[120px]">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="text-sm font-bold text-[#0b1c30] group-hover:text-[#2a14b4] leading-tight">
                         {preset.name}
                       </span>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 bg-[#e3dfff] text-[#2a14b4] rounded uppercase">
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-[#e3dfff] text-[#2a14b4] rounded uppercase shrink-0">
                         {preset.type}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#464554] leading-relaxed line-clamp-3">
+                    <p className="text-xs text-[#464554] leading-relaxed">
                       {preset.desc}
                     </p>
                   </div>
-                  <span className="text-[10px] text-[#2a14b4] font-semibold mt-3 inline-flex items-center gap-0.5 group-hover:underline">
+                  <span className="text-xs text-[#2a14b4] font-semibold mt-4 inline-flex items-center gap-0.5 group-hover:underline">
                     Load preset
-                    <span className="material-symbols-outlined text-[12px]">chevron_right</span>
+                    <span className="material-symbols-outlined text-[14px]">chevron_right</span>
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -207,16 +233,15 @@ export function LoadDocumentDialog({ onLoad }: LoadDocumentDialogProps) {
             <div className="flex-grow border-t border-[#c7c4d7]/60"></div>
           </div>
 
-          {/* Upload and Paste */}
           <div className="space-y-4">
             <div>
               <h3 className="text-xs font-semibold text-[#464554] uppercase tracking-wider mb-2">
-                Upload Document File (.txt)
+                Upload Document (.txt or .json)
               </h3>
-              <div className="border border-dashed border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#f8f9ff] rounded-xl p-6 text-center cursor-pointer transition-all relative">
+              <div className="border border-dashed border-[#c7c4d7] hover:border-[#2a14b4] hover:bg-[#f8f9ff] rounded-xl p-8 text-center cursor-pointer transition-all relative min-h-[140px] flex flex-col items-center justify-center">
                 <input
                   type="file"
-                  accept=".txt"
+                  accept=".txt,.json,text/plain,application/json"
                   onChange={handleFileUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -226,7 +251,9 @@ export function LoadDocumentDialog({ onLoad }: LoadDocumentDialogProps) {
                 <p className="text-sm font-semibold text-[#0b1c30]">
                   Click or drag file here to upload
                 </p>
-                <p className="text-xs text-[#777586] mt-1">Plain text (.txt) files only</p>
+                <p className="text-xs text-[#777586] mt-1">
+                  Supports .txt, .json, {"{{PERSON:0.95}}Name{{/}}"}, or bracket markers like {"[[PERSON NAME] John Smith [name]]"}
+                </p>
               </div>
             </div>
 
@@ -237,11 +264,12 @@ export function LoadDocumentDialog({ onLoad }: LoadDocumentDialogProps) {
               <textarea
                 value={customText}
                 onChange={(e) => setCustomText(e.target.value)}
-                placeholder="Paste your document content here to run PII redaction detection..."
-                className="w-full border border-[#c7c4d7] rounded-xl p-3 h-36 resize-none focus:outline-none focus:ring-1 focus:ring-[#2a14b4] focus:border-[#2a14b4] bg-[#f8f9ff] text-sm text-[#0b1c30]"
+                placeholder="Paste your document content here to run theme classification, redaction analysis, and gap detection..."
+                className="w-full border border-[#c7c4d7] rounded-xl p-4 h-40 resize-y focus:outline-none focus:ring-1 focus:ring-[#2a14b4] focus:border-[#2a14b4] bg-[#f8f9ff] text-sm text-[#0b1c30]"
               />
               <div className="flex justify-end mt-2">
                 <Button
+                  type="button"
                   onClick={handleCustomSubmit}
                   disabled={!customText.trim()}
                   className="bg-[#2a14b4] hover:bg-[#372abf] text-white font-semibold text-xs py-2 px-4 shadow rounded-lg active:scale-95 transition-all"
@@ -250,9 +278,14 @@ export function LoadDocumentDialog({ onLoad }: LoadDocumentDialogProps) {
                 </Button>
               </div>
             </div>
+
+            {error && (
+              <p className="text-xs text-[#ba1a1a] bg-[#ffdad6] px-3 py-2 rounded-lg">{error}</p>
+            )}
           </div>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 }

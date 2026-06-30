@@ -1,0 +1,23 @@
+{
+  "title": "Settlement Agreement — CV-2025-01122",
+  "text": "SETTLEMENT AGREEMENT AND MUTUAL RELEASE\n\nThis Settlement Agreement is entered into by and between:\n\nPlaintiff: Angela Brooks, residing at 901 Willow Court, Portland, OR 97201\nDefendant: Northwest Pacific Holdings, LLC\nCase No. CV-2025-01122\n\nWHEREAS, the parties wish to resolve all claims arising from the incident of September 3, 2025;\n\nNOW THEREFORE, in consideration of the mutual promises contained herein, the parties agree as follows:\n\n1. SETTLEMENT AMOUNT\nDefendant agrees to pay Plaintiff the sum of $87,500.00. Payment shall be made within thirty (30) days.\n\n2. RELEASE OF CLAIMS\nThe plaintiff, Angela Brooks, hereby releases all claims. The undersigned acknowledges receipt. The defendant denies liability.\n\n3. EXHIBITS\nExhibit A — Medical Records Summary\nExhibit B — Insurance Correspondence\nExhibit C — Wage Loss Calculation\n\n4. CONTACT\nAll notices shall be directed to Counsel at Law, 4400 Morrison Street, Portland, OR 97201.\nDirect inquiries to (503) 772-0044.\n\nIN WITNESS WHEREOF, the parties have executed this Agreement.\n\nAngela Brooks\nNorthwest Pacific Holdings, LLC\nClaims Adjuster: Mr. Thomas Reid",
+  "suggestions": [
+    { "text": "Angela Brooks",                "type": "PERSON",       "confidence": 0.95 },
+    { "text": "901 Willow Court, Portland, OR 97201", "type": "ADDRESS", "confidence": 0.91 },
+    { "text": "Northwest Pacific Holdings, LLC", "type": "ORGANIZATION", "confidence": 0.63 },
+    { "text": "CV-2025-01122",               "type": "CASE_NUMBER",  "confidence": 0.97 },
+    { "text": "September 3, 2025",           "type": "DATE",         "confidence": 0.90 },
+    { "text": "$87,500.00",                  "type": "FINANCIAL",    "confidence": 0.97 },
+    { "text": "The plaintiff",               "type": "PERSON",       "confidence": 0.48 },
+    { "text": "The undersigned",             "type": "PERSON",       "confidence": 0.42 },
+    { "text": "The defendant",               "type": "PERSON",       "confidence": 0.46 },
+    { "text": "Exhibit A",                   "type": "OTHER",        "confidence": 0.41 },
+    { "text": "Exhibit B",                   "type": "OTHER",        "confidence": 0.41 },
+    { "text": "Exhibit C",                   "type": "OTHER",        "confidence": 0.41 },
+    { "text": "Counsel at Law",              "type": "PERSON",       "confidence": 0.43 },
+    { "text": "4400 Morrison Street, Portland, OR 97201", "type": "ADDRESS", "confidence": 0.88 },
+    { "text": "(503) 772-0044",              "type": "PHONE",        "confidence": 0.93 },
+    { "text": "Claims Adjuster",             "type": "PERSON",       "confidence": 0.52 },
+    { "text": "Mr. Thomas Reid",             "type": "PERSON",       "confidence": 0.91 }
+  ]
+}

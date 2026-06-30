@@ -1,4 +1,6 @@
-export type DocumentType = "medical" | "legal" | "general" | "hybrid";
+import type { ProcessedDocument } from "./document-processor";
+
+export type DocumentType = "medical" | "legal" | "general" | "hybrid" | "finance";
 
 export type PIIType =
   | "PERSON"
@@ -30,6 +32,7 @@ export interface RedactionSpan {
   status: SpanStatus;
   isOriginalSuggestion: boolean; // false for gap-detected missed PII
   reviewerNote?: string;
+  reviewReason?: string;
 }
 
 export type CorrectionAction = "keep" | "false-positive" | "missed-pii" | "note-only";
@@ -50,21 +53,35 @@ export interface ClassificationResult {
   type: DocumentType;
   confidence: number;
   method: "keyword" | "llm" | "manual-override";
-  keywordScores?: { legal: number; medical: number };
+  keywordScores?: { legal: number; medical: number; finance?: number };
+  reasoning?: string;
 }
 
 export interface ReviewState {
   rawText: string;
+  documentContent: string;
   spans: RedactionSpan[];
   auditLog: AuditLogEntry[];
   documentType: DocumentType;
   classification: ClassificationResult;
   isApproved: boolean;
+  documentTitle: string;
+  filename?: string;
+  reviewableSpanIds: string[];
+  isProcessing: boolean;
+  isLlmRefining: boolean;
+  usedLlm: boolean;
+  processingMessage?: string;
+  llmFallbackReason?: string;
 }
 
 export type ReviewAction =
   | { type: "SET_DOCUMENT_TYPE"; payload: DocumentType }
   | { type: "APPLY_CORRECTION"; payload: { spanId: string; action: CorrectionAction; note?: string } }
+  | { type: "UNDO_LAST_CORRECTION" }
   | { type: "APPROVE" }
   | { type: "RESET" }
-  | { type: "LOAD_DOCUMENT"; payload: string };
+  | { type: "LOAD_DOCUMENT_START"; payload: { filename?: string } }
+  | { type: "LOAD_DOCUMENT_PROCESSED"; payload: { processed: ProcessedDocument; content: string; filename?: string } }
+  | { type: "LLM_REFINEMENT_START"; payload?: { message?: string } }
+  | { type: "LLM_REFINEMENT_END" };

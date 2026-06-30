@@ -72,7 +72,9 @@ export function CorrectionPopover({
 
   return (
     <Popover open={controlledOpen} onOpenChange={setControlledOpen}>
-      <PopoverTrigger>{children}</PopoverTrigger>
+      <PopoverTrigger nativeButton={false} render={<span className="inline" />}>
+        {children}
+      </PopoverTrigger>
       <PopoverContent
         className="w-[320px] p-0 border border-[#c7c4d7] shadow-xl rounded-xl overflow-hidden"
         side="top"
@@ -106,6 +108,7 @@ export function CorrectionPopover({
         <div className="p-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <Button
+              type="button"
               onClick={() => handleAction(span.status === "missed" ? "missed-pii" : "keep")}
               className="h-9 bg-[#006c49] hover:bg-[#005236] text-white text-xs font-semibold rounded-lg transition-all active:scale-95"
             >
@@ -114,6 +117,7 @@ export function CorrectionPopover({
               <kbd className="ml-1.5 text-[10px] opacity-70 bg-white/20 px-1 rounded">K</kbd>
             </Button>
             <Button
+              type="button"
               onClick={() => handleAction("false-positive")}
               variant="outline"
               className="h-9 border-[#c7c4d7] text-[#464554] hover:bg-[#ffdad6] hover:text-[#93000a] hover:border-[#ba1a1a] text-xs font-semibold rounded-lg transition-all active:scale-95"

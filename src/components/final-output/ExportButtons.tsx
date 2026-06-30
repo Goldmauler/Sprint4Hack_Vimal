@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { RedactionSpan, AuditLogEntry } from "@/lib/types";
 import { applyRedactions, buildAuditJSON, downloadFile } from "@/lib/redaction-utils";
 
@@ -9,36 +8,50 @@ interface ExportButtonsProps {
   spans: RedactionSpan[];
   auditLog: AuditLogEntry[];
   documentType: string;
+  exportFilename?: string;
 }
 
-export function ExportButtons({ rawText, spans, auditLog, documentType }: ExportButtonsProps) {
+export function ExportButtons({
+  rawText,
+  spans,
+  auditLog,
+  documentType,
+  exportFilename = "redacted_document.txt",
+}: ExportButtonsProps) {
+  const auditFilename = exportFilename.replace(/\.[^.]+$/, "_audit.json");
+
   const handleDownloadRedacted = () => {
     const redactedText = applyRedactions(rawText, spans);
-    downloadFile(redactedText, "redacted_document.txt", "text/plain");
+    downloadFile(redactedText, exportFilename, "text/plain");
   };
 
   const handleDownloadAudit = () => {
     const auditJSON = buildAuditJSON(spans, auditLog, documentType);
-    downloadFile(JSON.stringify(auditJSON, null, 2), "audit_report.json", "application/json");
+    downloadFile(JSON.stringify(auditJSON, null, 2), auditFilename, "application/json");
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <Button
+      <button
+        type="button"
         onClick={handleDownloadRedacted}
-        className="w-full bg-[#2a14b4] hover:bg-[#372abf] text-white py-3 rounded-lg flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
+        className="w-full bg-[#2a14b4] hover:bg-[#372abf] text-white rounded-lg flex items-center gap-3 px-4 py-3.5 shadow-sm active:scale-[0.98] transition-all text-left"
       >
-        <span className="material-symbols-outlined text-[20px]">download</span>
-        Download Redacted Document (.txt)
-      </Button>
-      <Button
+        <span className="material-symbols-outlined text-[22px] shrink-0">download</span>
+        <span className="text-sm font-semibold leading-snug">
+          Download Redacted Document (.txt)
+        </span>
+      </button>
+      <button
+        type="button"
         onClick={handleDownloadAudit}
-        variant="outline"
-        className="w-full border-[#c7c4d7] text-[#0b1c30] py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#e5eeff] active:scale-[0.98] transition-all"
+        className="w-full border border-[#c7c4d7] bg-white hover:bg-[#e5eeff] text-[#0b1c30] rounded-lg flex items-center gap-3 px-4 py-3.5 active:scale-[0.98] transition-all text-left"
       >
-        <span className="material-symbols-outlined text-[20px]">summarize</span>
-        Download Full Audit Report (.json)
-      </Button>
+        <span className="material-symbols-outlined text-[22px] shrink-0">summarize</span>
+        <span className="text-sm font-semibold leading-snug">
+          Download Full Audit Report (.json)
+        </span>
+      </button>
     </div>
   );
 }

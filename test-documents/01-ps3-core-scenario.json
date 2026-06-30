@@ -1,0 +1,23 @@
+{
+  "title": "Personal Injury Demand Letter — CV-2024-08841",
+  "text": "DEMAND LETTER\n\nRe: Personal Injury Claim — John Mitchell v. Pacific Coast Insurance Group\nCase No. CV-2024-08841\n\nDear Claims Adjuster,\n\nI am writing on behalf of my client, John Mitchell, regarding the above-referenced personal injury claim. The accident occurred on March 14, 2024, at the intersection of Harbor Boulevard and Westminster Avenue in Garden Grove, California.\n\nLIABILITY\n\nThe facts clearly establish that your insured was solely at fault. The police report, attached as Exhibit A, confirms the citation for reckless driving. The plaintiff maintains that liability is not in dispute. The undersigned has reviewed all evidence.\n\nINJURIES AND TREATMENT\n\nMr. Mitchell was transported by ambulance to Springfield General Hospital, where he was treated by Dr. Sarah Chen. He sustained a cervical strain and lumbar disc herniation at L4-L5. Following discharge, his brother Robert Vance accompanied him to follow-up appointments. Contact the office at (555) 401-2938 for records.\n\nDAMAGES\n\nMedical expenses (Springfield General Hospital): $12,340.00\nPhysical therapy (48 sessions): $9,600.00\nTotal medical damages: $45,750.00\nLost wages: $15,200.00\n\nDEMAND\n\nWe hereby demand $150,000.00 pursuant to Policy No. AIG-4471-XJ.\n\nSincerely,\nAttorney at Law",
+  "suggestions": [
+    { "text": "John Mitchell",              "type": "PERSON",       "confidence": 0.95 },
+    { "text": "Pacific Coast Insurance Group","type": "ORGANIZATION", "confidence": 0.62 },
+    { "text": "CV-2024-08841",              "type": "CASE_NUMBER",  "confidence": 0.97 },
+    { "text": "Claims Adjuster",             "type": "PERSON",       "confidence": 0.55 },
+    { "text": "March 14, 2024",             "type": "DATE",         "confidence": 0.88 },
+    { "text": "Exhibit A",                  "type": "OTHER",        "confidence": 0.48 },
+    { "text": "The plaintiff",              "type": "PERSON",       "confidence": 0.51 },
+    { "text": "The undersigned",            "type": "PERSON",       "confidence": 0.44 },
+    { "text": "Springfield General Hospital","type": "ORGANIZATION", "confidence": 0.60 },
+    { "text": "Dr. Sarah Chen",             "type": "PERSON",       "confidence": 0.93 },
+    { "text": "$12,340.00",                 "type": "FINANCIAL",    "confidence": 0.96 },
+    { "text": "$9,600.00",                  "type": "FINANCIAL",    "confidence": 0.96 },
+    { "text": "$45,750.00",                 "type": "FINANCIAL",    "confidence": 0.96 },
+    { "text": "$15,200.00",                 "type": "FINANCIAL",    "confidence": 0.96 },
+    { "text": "$150,000.00",                "type": "FINANCIAL",    "confidence": 0.96 },
+    { "text": "AIG-4471-XJ",               "type": "FINANCIAL_ID", "confidence": 0.94 },
+    { "text": "Attorney at Law",            "type": "PERSON",       "confidence": 0.40 }
+  ]
+}

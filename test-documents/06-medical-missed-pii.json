@@ -1,0 +1,13 @@
+{
+  "title": "Patient Discharge Summary — MED-2026-4421",
+  "text": "SPRINGFIELD GENERAL HOSPITAL\nPATIENT DISCHARGE SUMMARY\n\nPatient Name: Maria Gonzalez\nDate of Birth: July 22, 1979\nAdmission Date: June 15, 2026\nDischarge Date: June 18, 2026\nMedical Record No: MED-2026-4421\nAttending Physician: Dr. Kevin Okafor\n\nEmergency Contact: Carlos Gonzalez (husband)\nContact Number: (714) 883-2291\n\nDIAGNOSIS:\n1. Acute appendicitis with perforation\n2. Post-operative infection, mild\n\nSUMMARY OF CLINICAL COURSE:\nPatient was admitted via the Emergency Department presenting with acute right lower quadrant pain. CT imaging confirmed acute appendicitis. Dr. Kevin Okafor performed a laparoscopic appendectomy on June 15, 2026. Recovery was complicated by mild surgical site infection treated with IV antibiotics.\n\nDISCHARGE MEDICATIONS:\n1. Amoxicillin-clavulanate 875mg PO BID x 7 days\n2. Ibuprofen 400mg PO TID PRN pain\n\nFOLLOW-UP:\nFollow up with Dr. Kevin Okafor at Springfield General Outpatient Clinic within 7 days. Call (714) 883-2291 if symptoms worsen. Insurance policy: BlueCross PPO-8812-MG.",
+  "suggestions": [
+    { "text": "Maria Gonzalez",       "type": "PERSON",       "confidence": 0.96 },
+    { "text": "July 22, 1979",        "type": "DATE",         "confidence": 0.91 },
+    { "text": "June 15, 2026",        "type": "DATE",         "confidence": 0.88 },
+    { "text": "June 18, 2026",        "type": "DATE",         "confidence": 0.88 },
+    { "text": "MED-2026-4421",        "type": "FINANCIAL_ID", "confidence": 0.89 },
+    { "text": "Dr. Kevin Okafor",     "type": "PERSON",       "confidence": 0.94 },
+    { "text": "June 15, 2026",        "type": "DATE",         "confidence": 0.88 }
+  ]
+}

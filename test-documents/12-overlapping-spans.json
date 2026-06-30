@@ -1,0 +1,19 @@
+{
+  "title": "Overlapping Span Deduplication Test",
+  "text": "PATIENT RECORD\n\nPatient: Dr. James Thornton\nDOB: 05/12/1965\nPhone: (404) 221-9900\nInsurance: BlueCross Policy BCX-2026-7711\n\nDr. James Thornton was admitted on January 5, 2026. The patient, James Thornton, has a history of hypertension. Dr. Thornton's emergency contact is his wife Carol Thornton at (404) 221-9900.\n\nDiagnosis: Hypertensive crisis requiring immediate intervention.\nTreating physician: Dr. James Thornton (self-admitted, medical staff).\nDischarge approved by Dr. Thornton on January 8, 2026.",
+  "suggestions": [
+    { "text": "Dr. James Thornton",    "type": "PERSON",       "confidence": 0.95 },
+    { "text": "James Thornton",        "type": "PERSON",       "confidence": 0.88 },
+    { "text": "Dr. James Thornton",    "type": "PERSON",       "confidence": 0.95 },
+    { "text": "05/12/1965",            "type": "DATE",         "confidence": 0.91 },
+    { "text": "(404) 221-9900",        "type": "PHONE",        "confidence": 0.93 },
+    { "text": "(404) 221-9900",        "type": "PHONE",        "confidence": 0.93 },
+    { "text": "BlueCross",             "type": "ORGANIZATION", "confidence": 0.72 },
+    { "text": "BCX-2026-7711",         "type": "FINANCIAL_ID", "confidence": 0.94 },
+    { "text": "January 5, 2026",       "type": "DATE",         "confidence": 0.89 },
+    { "text": "James Thornton",        "type": "PERSON",       "confidence": 0.88 },
+    { "text": "Carol Thornton",        "type": "PERSON",       "confidence": 0.90 },
+    { "text": "January 8, 2026",       "type": "DATE",         "confidence": 0.89 },
+    { "text": "Dr. Thornton",          "type": "PERSON",       "confidence": 0.87 }
+  ]
+}

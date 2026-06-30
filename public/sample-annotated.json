@@ -1,0 +1,15 @@
+{
+  "title": "Personal Injury Demand Letter",
+  "text": "DEMAND LETTER\n\nRe: Personal Injury Claim — John Mitchell v. Pacific Coast Insurance Group\nCase No. CV-2024-08841\n\nDear Claims Adjuster,\n\nI am writing on behalf of my client, John Mitchell, regarding the above-referenced personal injury claim arising from a motor vehicle accident that occurred on March 14, 2024.\n\nThe plaintiff maintains that liability is not in dispute. Mr. Mitchell was transported by ambulance to Springfield General Hospital, where he was treated by Dr. Sarah Chen.\n\nTotal medical damages: $45,750.00. This demand is made pursuant to Policy No. AIG-4471-XJ.\n\nIf we are unable to reach an amicable resolution, the undersigned will pursue all available legal remedies on behalf of the plaintiff, including the filing of a civil lawsuit per Exhibit C.\n\nEmergency contact Robert Mitchell can be reached at (555) 867-5309.\n\nSincerely,\nAttorney at Law",
+  "suggestions": [
+    { "text": "John Mitchell", "type": "PERSON", "confidence": 0.95 },
+    { "text": "CV-2024-08841", "type": "CASE_NUMBER", "confidence": 0.91 },
+    { "text": "March 14, 2024", "type": "DATE", "confidence": 0.79 },
+    { "text": "Springfield General Hospital", "type": "ORGANIZATION", "confidence": 0.62 },
+    { "text": "$45,750.00", "type": "FINANCIAL", "confidence": 0.88 },
+    { "text": "AIG-4471-XJ", "type": "FINANCIAL_ID", "confidence": 0.93 },
+    { "text": "the undersigned", "type": "OTHER", "confidence": 0.55 },
+    { "text": "the plaintiff", "type": "OTHER", "confidence": 0.48 },
+    { "text": "Exhibit C", "type": "OTHER", "confidence": 0.51 }
+  ]
+}

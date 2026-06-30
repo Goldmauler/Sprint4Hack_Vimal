@@ -1,8 +1,9 @@
 import { PIIType, SpanStatus } from "./types";
 
 // Confidence thresholds
-export const AUTO_TRUST_THRESHOLD = 0.85;
+export const AUTO_TRUST_THRESHOLD = 0.78;
 export const NEEDS_REVIEW_THRESHOLD = 0.50;
+export const LLM_CLASSIFICATION_THRESHOLD = 0.55;
 
 // Risk score thresholds
 export const HIGH_RISK_FLOOR = 80;

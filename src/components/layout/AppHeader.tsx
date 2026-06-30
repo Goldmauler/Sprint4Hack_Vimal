@@ -22,22 +22,28 @@ interface AppHeaderProps {
   reviewedCount: number;
   totalReviewable: number;
   canApprove: boolean;
+  canUndo?: boolean;
   classification: ClassificationResult;
   onTypeChange: (type: DocumentType) => void;
   onApprove: () => void;
+  onUndo?: () => void;
   onReset: () => void;
   isApproved: boolean;
+  isReprocessing?: boolean;
 }
 
 export function AppHeader({
   reviewedCount,
   totalReviewable,
   canApprove,
+  canUndo = false,
   classification,
   onTypeChange,
   onApprove,
+  onUndo,
   onReset,
   isApproved,
+  isReprocessing = false,
 }: AppHeaderProps) {
   const pathname = usePathname();
   const progressPercent = totalReviewable > 0
@@ -48,7 +54,7 @@ export function AppHeader({
     <header className="h-16 border-b border-[#c7c4d7] bg-[#f8f9ff] fixed top-0 w-full z-50 flex items-center justify-between px-6 lg:px-8">
       {/* Left section */}
       <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" prefetch={false} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#4338ca] flex items-center justify-center">
             <span className="material-symbols-outlined text-white text-[18px]">shield</span>
           </div>
@@ -64,6 +70,7 @@ export function AppHeader({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${
                   isActive
                     ? "text-[#2a14b4] font-semibold bg-[#e3dfff]"
@@ -82,6 +89,7 @@ export function AppHeader({
         <DocumentTypeBadge
           classification={classification}
           onTypeChange={onTypeChange}
+          isReprocessing={isReprocessing}
         />
 
         <div className="flex items-center gap-2 text-sm">
@@ -99,8 +107,21 @@ export function AppHeader({
 
       {/* Right section */}
       <div className="flex items-center gap-3">
+        {canUndo && onUndo && !isApproved && (
+          <Button
+            type="button"
+            onClick={onUndo}
+            variant="outline"
+            className="text-sm border-[#c7c4d7] text-[#464554] hover:bg-[#e5eeff] hidden sm:inline-flex"
+            title="Undo last correction (Ctrl+Z)"
+          >
+            <span className="material-symbols-outlined text-[16px] mr-1">undo</span>
+            Undo
+          </Button>
+        )}
         {isApproved ? (
           <Button
+            type="button"
             onClick={onReset}
             variant="outline"
             className="text-sm border-[#c7c4d7] text-[#464554] hover:bg-[#e5eeff]"
@@ -110,23 +131,24 @@ export function AppHeader({
           </Button>
         ) : (
           <Tooltip>
-            <TooltipTrigger>
-              <span>
-                <Button
-                  onClick={onApprove}
-                  disabled={!canApprove}
-                  className={`text-sm font-semibold transition-all duration-200 ${
-                    canApprove
-                      ? "bg-[#2a14b4] hover:bg-[#372abf] text-white shadow-md hover:shadow-lg"
-                      : "bg-[#c7c4d7] text-[#777586] cursor-not-allowed"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[16px] mr-1">
-                    {canApprove ? "check_circle" : "lock"}
-                  </span>
-                  Approve & Generate
-                </Button>
-              </span>
+            <TooltipTrigger
+              render={<span className="inline-flex" />}
+            >
+              <Button
+                type="button"
+                onClick={onApprove}
+                disabled={!canApprove}
+                className={`text-sm font-semibold transition-all duration-200 ${
+                  canApprove
+                    ? "bg-[#2a14b4] hover:bg-[#372abf] text-white shadow-md hover:shadow-lg"
+                    : "bg-[#c7c4d7] text-[#777586] cursor-not-allowed"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px] mr-1">
+                  {canApprove ? "check_circle" : "lock"}
+                </span>
+                Approve & Generate
+              </Button>
             </TooltipTrigger>
             {!canApprove && (
               <TooltipContent side="bottom" className="max-w-[240px] text-xs">

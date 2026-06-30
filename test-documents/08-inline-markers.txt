@@ -1,0 +1,23 @@
+INSURANCE CLAIM FORM — Submitted for Review
+
+Claimant: {{PERSON:0.97}}Patricia Holloway{{/}}
+Date of Birth: {{DATE:0.72}}November 4, 1981{{/}}
+Policy Number: {{FINANCIAL_ID:0.95}}PWR-2024-8812{{/}}
+Phone: {{PHONE:0.93}}(612) 445-7731{{/}}
+Email: {{OTHER:0.91}}pholloway@gmail.com{{/}}
+
+Incident Date: {{DATE:0.68}}December 12, 2024{{/}}
+Incident Location: {{ADDRESS:0.55}}1200 Lakeside Drive, Minneapolis, MN 55401{{/}}
+
+Description of Incident:
+Ms. Holloway reports that her vehicle was struck by a driver insured under {{FINANCIAL_ID:0.60}}Policy No. SFI-9920-PT{{/}}. The at-fault driver, {{PERSON:0.88}}Marcus Webb{{/}}, was cited by {{ORGANIZATION:0.58}}Minneapolis Police Department{{/}}.
+
+Estimated Vehicle Damage: {{FINANCIAL:0.96}}$14,200.00{{/}}
+Medical Expenses to Date: {{FINANCIAL:0.94}}$3,800.00{{/}}
+
+Treating Physician: {{PERSON:0.92}}Dr. Anita Sharma{{/}}
+Hospital: {{ORGANIZATION:0.62}}Hennepin County Medical Center{{/}}
+Diagnosis: {{DIAGNOSIS:0.71}}cervical strain and whiplash injury{{/}}
+
+Note: {{ORGANIZATION:0.44}}Claims Department{{/}} should process this within 30 days.
+Adjuster assigned: {{PERSON:0.51}}Claims Team Representative{{/}}

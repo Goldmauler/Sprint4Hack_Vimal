@@ -1,0 +1,25 @@
+STANDARD OPERATING PROCEDURE
+Revision 3.1 — For internal distribution only
+
+PURPOSE
+
+This document defines procedures for document review workflows. It applies to all review stages and contains no personally identifying information.
+
+SCOPE
+
+This procedure applies to all departments involved in processing. No names, contact details, financial identifiers, or medical records are referenced here.
+
+STEPS
+
+Step 1: Receive the document batch from the upstream queue.
+Step 2: Classify using the automated classification engine.
+Step 3: Apply redaction rules appropriate to the document class.
+Step 4: Route flagged items to the human review queue.
+Step 5: Reviewer confirms or overrides each flagged item.
+Step 6: Approve and export the final document.
+
+REVIEW CYCLE
+
+This procedure is reviewed annually. Changes require approval from the relevant oversight committee. No individual identifiers are referenced here.
+
+Version history is maintained in a separate tracking system.

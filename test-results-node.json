@@ -1,0 +1,82 @@
+[
+  {
+    "test": "Low-confidence general memo (LLM fallback)",
+    "endpoint": "/api/process-document",
+    "http": 200,
+    "pass": true,
+    "details": "spans=8; type=general; conf=0.95; method=llm; usedLlm=true; reviewable=0; LLM fallback triggered; method=llm ok",
+    "error": ""
+  },
+  {
+    "test": "Legal NDA (SSN, emails, names)",
+    "endpoint": "/api/process-document",
+    "http": 200,
+    "pass": true,
+    "details": "spans=20; type=legal; conf=0.98; method=llm; usedLlm=true; reviewable=2; piiTypes=PERSON,ORGANIZATION,OTHER,DATE,FINANCIAL_ID",
+    "error": ""
+  },
+  {
+    "test": "Medical discharge summary",
+    "endpoint": "/api/process-document",
+    "http": 200,
+    "pass": true,
+    "details": "spans=15; type=medical; conf=0.95; method=keyword; usedLlm=false; reviewable=1; diagnosisSpans=0; keywordClass=true",
+    "error": ""
+  },
+  {
+    "test": "Finance/banking statement",
+    "endpoint": "/api/process-document",
+    "http": 200,
+    "pass": true,
+    "details": "spans=22; type=finance; conf=0.95; method=keyword; usedLlm=false; reviewable=3; financialSpans=5; type=finance",
+    "error": ""
+  },
+  {
+    "test": "Reprocess theme: general",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "spans=17; type=general; conf=1; method=llm; usedLlm=true; reviewable=3",
+    "error": ""
+  },
+  {
+    "test": "Reprocess theme: medical",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "spans=17; type=medical; conf=1; method=llm; usedLlm=true; reviewable=3",
+    "error": ""
+  },
+  {
+    "test": "Reprocess theme: legal",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "spans=14; type=legal; conf=1; method=llm; usedLlm=false; reviewable=3",
+    "error": ""
+  },
+  {
+    "test": "Reprocess theme: hybrid",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "spans=19; type=hybrid; conf=1; method=llm; usedLlm=true; reviewable=4",
+    "error": ""
+  },
+  {
+    "test": "Reprocess theme: finance",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "spans=15; type=finance; conf=1; method=llm; usedLlm=true; reviewable=5",
+    "error": ""
+  },
+  {
+    "test": "Theme diff: medical fewer legal boilerplate flags",
+    "endpoint": "/api/reprocess-theme",
+    "http": 200,
+    "pass": true,
+    "details": "medical=2; legal=2; hybrid=4",
+    "error": ""
+  }
+]

@@ -1,0 +1,21 @@
+ACCOUNT STATEMENT — First National Bank
+
+Account Holder: James Whitfield
+Account Number: 4829-1037-5600-2210
+Routing Number: 021000089
+SSN: 387-55-9012
+Email: j.whitfield@personalmail.com
+Phone: (312) 554-9901
+Address: 2847 Maple Drive, Chicago, IL 60601
+
+Transactions — June 2026:
+
+06/01  Opening balance                      $4,200.00
+06/03  Wire transfer IN — ACME Corp         $3,500.00
+06/07  Withdrawal — ATM                       $200.00
+06/12  Direct deposit — Employer            $2,800.00
+06/15  Wire transfer OUT — Landlord         $1,800.00
+06/22  Payment — Chase Visa ending 4421       $450.00
+06/28  Closing balance                      $8,050.00
+
+For questions contact your relationship manager, Sandra Torres, at (312) 554-9901.
