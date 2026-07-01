@@ -282,13 +282,34 @@ function parseJsonDocument(content: string): ParsedDocument | null {
       if (endOffset === undefined) {
         endOffset = startOffset + text.length;
       }
+
+      // Suggestions given as bare text with no offset (the common annotated-import
+      // case) may appear more than once in the document — annotate every
+      // occurrence, not just the first, so repeated mentions of the same PII
+      // don't silently slip through unredacted.
+      if (item.text && item.startOffset === undefined && item.start === undefined) {
+        let searchFrom = 0;
+        let found = false;
+        while (true) {
+          const idx = rawText.indexOf(text, searchFrom);
+          if (idx === -1) break;
+          found = true;
+          annotations.push({
+            text,
+            startOffset: idx,
+            endOffset: idx + text.length,
+            type: normalizePIIType(item.type || "OTHER"),
+            confidence: Math.min(1, Math.max(0, item.confidence ?? 0.7)),
+          });
+          searchFrom = idx + text.length;
+        }
+        if (!found) continue;
+        continue;
+      }
+
       if (!item.text && item.startOffset === undefined && item.start !== undefined) {
         startOffset = rawText.indexOf(text, item.start);
         if (startOffset === -1) startOffset = item.start;
-        endOffset = startOffset + text.length;
-      } else if (item.text && item.startOffset === undefined && item.start === undefined) {
-        startOffset = rawText.indexOf(text);
-        if (startOffset === -1) continue;
         endOffset = startOffset + text.length;
       }
 
